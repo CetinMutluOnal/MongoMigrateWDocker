@@ -1,0 +1,25 @@
+version: '3.9' # Changeable
+
+services:
+  mongodb:
+    container_name: mydb 		# Name for main db container
+    build: 
+      context: .
+      dockerfile: ./Dockerfile  	# Dockerfile location. Image specification can define in this file.
+    ports: 
+    - 27019:27017  			#27017 is the default port for mongodb from outside. 27019 represents db container port from inside for db container that will be created. 27019 value is changeable.
+
+
+
+# If we want to migrate db data to newly created db container, previously exported mongodb BSON files can locate with this section.
+
+  mongo-seed:
+    container_name: my-db-seed 				#Container name that will move to import to datas to main db container.
+    build: 
+      context: .
+      dockerfile: ./Dockerfile
+    links:
+      - mongodb
+    volumes:
+      - ./dump/diemSocial:/seed-data/diemSocial   	#Left section before :/ is the real location of the dumped db files. The right section represents logical volume for that real file location.
+    command: "mongorestore --host mongodb /seed-data/" #Container runs this command and mongo imports the dumped files.
